@@ -1073,7 +1073,7 @@ To validate attribute transfer accuracy, random numeric values were assigned to 
 
 ### Parameter sensitivity
 
-Systematic testing across parameter combinations (distance_tolerance: 5-20m, angle_tolerance: 5-30°) reveals ANIME's robustness. F1-scores remain stable across most parameter settings, with optimal performance at moderate tolerances. Larger distance tolerances increase recall but may reduce precision in dense urban areas, while stricter angle tolerances improve precision for grid-like networks but may miss matches in organic road patterns.
+Systematic testing across parameter combinations (distance_tolerance: 5-30m, angle_tolerance: 5-45°) reveals ANIME's robustness. F1-scores remain stable across most parameter settings, with optimal performance at moderate tolerances. Larger distance tolerances increase recall but may reduce precision in dense urban areas, while stricter angle tolerances improve precision for grid-like networks but may miss matches in organic road patterns.
 
 ```{r}
 #| label: fig-sensitivity-heatmap
@@ -1081,8 +1081,8 @@ Systematic testing across parameter combinations (distance_tolerance: 5-20m, ang
 #| echo: false
 
 # Parameter grid
-distance_values <- c(5, 10, 15, 20)
-angle_values <- c(5, 10, 15, 20, 25, 30)
+distance_values <- c(5, 10, 15, 20, 25, 30)
+angle_values <- c(5, 10, 15, 20, 25, 30, 35, 40, 45)
 
 sensitivity_results <- expand.grid(
   distance_tolerance = distance_values,
@@ -1302,13 +1302,13 @@ All analysis code for this manuscript is available at <https://github.com/Josiah
 
 Author contributions following CRediT (Contributor Roles Taxonomy):
 
-- **Josiah Parry**: Conceptualization, Methodology, Software, Validation, Writing - Original Draft, Writing - Review & Editing
-- **Zhao Wang**: Validation, Data Curation, Writing - Review & Editing, Visualization
-- **Robin Lovelace**: Conceptualization, Supervision, Writing - Review & Editing
+- **Josiah Parry**: Conceptualization, Methodology, Software, Writing – Original Draft, Writing – Review & Editing
+- **Zhao Wang**: Writing – Original Draft, Validation, Software, Data Curation, Visualization
+- **Robin Lovelace**: Methodology, Software, Supervision, Writing – Review & Editing
 
 # Conflict of Interest {.unnumbered}
 
-Josiah Parry is employed by Environmental Systems Research Institute (Esri). The remaining authors declare no conflicts of interest. The views expressed in this paper are solely those of the authors and do not represent the official position of any affiliated organization.
+Josiah Parry is employed by Environmental Systems Research Institute (Esri). The remaining authors declare no conflicts of interest. 
 
 # Funding {.unnumbered}
 

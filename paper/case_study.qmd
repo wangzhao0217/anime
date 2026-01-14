@@ -20,39 +20,51 @@ suppressMessages(library(sf))
 suppressMessages(library(dplyr))
 suppressMessages(library(ggplot2))
 suppressMessages(library(knitr))
-
+library(sf)
 # -----------------------------
 # Load pre-prepared datasets
 # -----------------------------
-os_edinburgh <- st_read("../data/os_edinburgh.gpkg", quiet = TRUE)
-os_glasgow <- st_read("../data/os_glasgow.gpkg", quiet = TRUE)
-osm_edinburgh <- st_read("../data/osm_edinburgh.gpkg", quiet = TRUE)
-osm_glasgow <- st_read("../data/osm_glasgow.gpkg", quiet = TRUE)
+os_edinburgh <- sf::st_read("../data/os_edinburgh.gpkg", quiet = TRUE)
+os_glasgow <- sf::st_read("../data/os_glasgow.gpkg", quiet = TRUE)
+osm_edinburgh <- sf::st_read("../data/osm_edinburgh.gpkg", quiet = TRUE)
+osm_glasgow <- sf::st_read("../data/osm_glasgow.gpkg", quiet = TRUE)
 
 # Load NPT and bus route data for Cases 1-2
-npt_sf <- st_read("../data/NPT.gpkg", quiet = TRUE)
-osm_bus_route_sf <- st_read("../data/osm_bus_route.gpkg", quiet = TRUE)
+npt_sf <- sf::st_read("../data/NPT.gpkg", quiet = TRUE)
+osm_bus_route_sf <- sf::st_read("../data/osm_bus_route.gpkg", quiet = TRUE)
 
 # Convert multilinestrings to linestrings for ANIME compatibility
-osm_edinburgh <- st_cast(osm_edinburgh, "LINESTRING")
-osm_glasgow <- st_cast(osm_glasgow, "LINESTRING")
-npt_sf <- st_cast(npt_sf, "LINESTRING")
-osm_bus_route_sf <- st_cast(osm_bus_route_sf, "LINESTRING")
+osm_edinburgh <- sf::st_cast(osm_edinburgh, "LINESTRING")
+osm_glasgow <- sf::st_cast(osm_glasgow, "LINESTRING")
+npt_sf <- sf::st_cast(npt_sf, "LINESTRING")
+osm_bus_route_sf <- sf::st_cast(osm_bus_route_sf, "LINESTRING")
 
 # Add target IDs for reference
 os_edinburgh$target_id <- 1:nrow(os_edinburgh)
 os_glasgow$target_id <- 1:nrow(os_glasgow)
 
 # Ensure all datasets are in the same CRS (British National Grid - EPSG:27700)
-if(st_crs(npt_sf)$input != "EPSG:27700") {
-  npt_sf <- st_transform(npt_sf, 27700)
+if(sf::st_crs(npt_sf)$input != "EPSG:27700") {
+  npt_sf <- sf::st_transform(npt_sf, 27700)
 }
-if(st_crs(osm_bus_route_sf)$input != "EPSG:27700") {
-  osm_bus_route_sf <- st_transform(osm_bus_route_sf, 27700)
+if(sf::st_crs(osm_bus_route_sf)$input != "EPSG:27700") {
+  osm_bus_route_sf <- sf::st_transform(osm_bus_route_sf, 27700)
 }
 
-# Define sample target lines for demonstration
-sample_target_ids <- c(69, 1192, 422, 153, 998)
+# Select target features that overlap with NPT data (for Cases 1-2)
+npt_bbox <- sf::st_bbox(npt_sf)
+os_in_npt_area <- os_edinburgh[sf::st_intersects(os_edinburgh, sf::st_as_sfc(npt_bbox), sparse = FALSE), ]
+
+# Select 5 sample targets from the overlapping area
+if(nrow(os_in_npt_area) >= 5) {
+  set.seed(42)
+  sample_target_ids <- sample(os_in_npt_area$target_id, 5)
+} else if(nrow(os_in_npt_area) > 0) {
+  sample_target_ids <- os_in_npt_area$target_id[1:min(5, nrow(os_in_npt_area))]
+} else {
+  # Fallback: use first 5 targets if no overlap found
+  sample_target_ids <- os_edinburgh$target_id[1:5]
+}
 
 # -----------------------------
 # Validation Data Preparation (Edinburgh)
@@ -563,15 +575,15 @@ ggplot(validation_sf_5) +
 
 ## Case 5: Parameter Sensitivity Analysis
 
-This case examines how ANIME's matching accuracy varies with different parameter settings. By systematically testing combinations of `distance_tolerance` (5-20m) and `angle_tolerance` (5-30°), we identify optimal parameter ranges and understand the algorithm's sensitivity to these settings.
+This case examines how ANIME's matching accuracy varies with different parameter settings. By systematically testing combinations of `distance_tolerance` (5-30m) and `angle_tolerance` (5-45°), we identify optimal parameter ranges and understand the algorithm's sensitivity to these settings.
 
 ```{r}
 #| label: case5-sensitivity
 #| echo: true
 
 # Define parameter grid
-distance_values <- c(5, 10, 15, 20)
-angle_values <- c(5, 10, 15, 20, 25, 30)
+distance_values <- c(5, 10, 15, 20, 25, 30)
+angle_values <- c(5, 10, 15, 20, 25, 30, 35, 40, 45)
 
 sensitivity_results <- expand.grid(
   distance_tolerance = distance_values,
