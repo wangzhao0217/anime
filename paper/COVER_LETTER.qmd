@@ -1,0 +1,51 @@
+---
+format:
+  pdf:
+    documentclass: article
+    geometry:
+      - margin=1in
+      - letterpaper
+
+engine: knitr
+number-sections: true
+execute:
+  echo: false
+  message: false
+  warning: false
+editor:
+  markdown:
+    wrap: sentence
+---
+
+```{r}
+#| eval: false
+quarto::quarto_render("cover_letter.qmd")
+```
+
+Dear Editor-in-Chief,
+
+We are pleased to submit our original research manuscript entitled "**ANIME: Approximate Network Integration, Matching and Enrichment**" for consideration for publication in the *International Journal of Geographical Information Science*.
+
+This paper introduces "ANIME", a novel algorithmic framework for network conflation that addresses fundamental limitations in existing approaches. Current conflation methods produce binary match decisions that struggle with complex topological relationships, fail to handle many-to-many (m:n) correspondences natively, and provide no rigorous foundation for statistically sound attribute transfer. The ANIME method overcomes these limitations by quantifying the degree of geometric correspondence between linear features through shared length calculations, enabling robust handling of complex network relationships and weighted attribute integration grounded in established areal interpolation theory.
+
+The primary methodological contributions of our work, which we believe align directly with the scope of *IJGIS*, include:
+
+1.  **A Quantitative Correspondence Framework:** We develop a segment-level geometric matching approach that computes shared length ($SL_{ij}$) between corresponding features, providing continuous correspondence measures rather than binary decisions. This enables uncertainty-aware downstream analysis and confidence-weighted decision making in multi-source data integration.
+2.  **Native M:N Relationship Handling:** The algorithm decomposes linestrings into constituent segments, enabling native support for complex many-to-many relationships where single features in one network match multiple features in another—a common scenario in real-world network integration that existing methods handle poorly or through ad-hoc post-processing.
+3.  **Mathematically Grounded Attribute Transfer:** We establish rigorous foundations for weighted attribute integration based on areal interpolation theory, distinguishing between extensive variables (counts, requiring proportional apportionment) and intensive variables (rates, requiring weighted averaging). This theoretical grounding ensures statistically valid attribute transfer during conflation.
+4.  **High-Performance Implementation:** The algorithm is implemented in Rust with bindings for both R and Python, leveraging R*-tree spatial indexing to process networks of 15,000+ features in sub-second time. This multi-language architecture ensures broad accessibility across the geospatial research community while maintaining computational efficiency.
+5.  **A Comprehensive Validation Framework:** We demonstrate validation achieving 94.3% F1-score accuracy on Scottish transport networks, with parameter sensitivity analysis across 54 parameter combinations, bootstrap confidence intervals, systematic error categorisation, and geographic generalisability testing across Edinburgh and Glasgow urban morphologies.
+
+Our research demonstrates the application of ANIME to national transportation datasets from Scotland, showcasing its ability to handle complex-to-simplified geometry matching and multi-source attribute integration. The findings highlight how this quantitative approach can enable more nuanced spatial analysis than traditional binary conflation methods, with applications in transport planning and potential extensions to hydrographic conflation, ecological modelling, and infrastructure management. Furthermore, the methodology is implemented as an open-source package (MIT licence) with bindings for both R and Python, promoting transparency, reproducibility, and wider adoption by the geospatial research community.
+
+We believe this manuscript offers a significant methodological advancement in the field of spatial data integration. By reconceptualising network conflation as measurement rather than classification, ANIME provides a practical, efficient, and mathematically rigorous framework that can assist researchers and practitioners globally in integrating network datasets from disparate sources, thereby contributing to more robust and uncertainty-aware geospatial analysis.
+
+We confirm that this manuscript has not been published elsewhere and is not under consideration by another journal. All authors have approved the manuscript and agree with its submission to *International Journal of Geographical Information Science*.
+
+Thank you for considering our work. We look forward to your feedback.
+
+Sincerely,
+
+Dr. Zhao Wang
+
+Leeds Institute for Transport Studies, University of Leeds, UK
