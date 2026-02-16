@@ -19,14 +19,15 @@ author:
 
 format:
   pdf:
+    pdf-engine: lualatex
     include-in-header:
       text: |
-        \usepackage{lineno}
-        \linenumbers
         \usepackage{amsmath}
         \usepackage{algorithm}
         \usepackage{algpseudocode}
         \usepackage{float}
+        \usepackage[hyphens]{url}
+        \usepackage[breaklinks=true,hypertexnames=false]{hyperref}
 filters:
   - pseudocode
   
