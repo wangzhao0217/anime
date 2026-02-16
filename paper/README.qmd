@@ -943,10 +943,10 @@ The underlying data structure produced by ANIME contains detailed correspondence
 
 ```{r}
 #| label: tbl-match-results
+#| tbl-cap: "Sample of matched pairs with shared length."
 #| echo: false
 knitr::kable(
-  head(match_df),
-  caption = "Sample of matched pairs with shared length."
+  head(match_df)
 )
 ```
 
