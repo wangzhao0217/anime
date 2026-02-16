@@ -946,7 +946,8 @@ The underlying data structure produced by ANIME contains detailed correspondence
 #| tbl-cap: "Sample of matched pairs with shared length."
 #| echo: false
 knitr::kable(
-  head(match_df)
+  head(match_df),
+  digits = 2
 )
 ```
 
