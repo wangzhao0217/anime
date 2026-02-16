@@ -121,7 +121,7 @@ abstract_f1 <- 2 * prec * rec / (prec + rec)
 
 # Abstract {.unnumbered}
 
-Reconciling topologically different linestrings is a fundamental challenge in spatial data science, particularly when integrating network datasets from disparate sources.
+Joining topologically different linestrings is a fundamental challenge in spatial data science, particularly when integrating network datasets from disparate sources.
 Existing methods are limited by the absence of join keys and the requirement of direct transfer of attributes.
 This paper presents ANIME (Approximate Network Integration, Matching and Enrichment), a segment-level geometric matching algorithm that uniquely combines decomposition with quantitative shared length measurement, implemented in a high-performance, open-source Rust library with bindings to R and Python.
 ANIME quantifies the degree of correspondence between line geometries through shared length calculations, enabling robust handling of m:n relationships and complex topological dissimilarities.
