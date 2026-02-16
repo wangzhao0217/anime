@@ -121,8 +121,8 @@ abstract_f1 <- 2 * prec * rec / (prec + rec)
 
 # Abstract {.unnumbered}
 
-Spatial joins are a fundamental technique spatial data science, but established techniques struggle when both source and target geometries are linestrings.
-Existing methods are limited by the absence of join keys and the requirement of direct transfer of attributes.
+Spatial joins are a fundamental technique in spatial data science, but established techniques struggle when both source and target geometries are linestrings.
+Existing methods are limited by the use of buffers or distance rules resulting in binary joins, whereas in fact the extent to which two linestrings overlap can usefully be seen as a continuous variable.
 This paper presents ANIME (Approximate Network Integration, Matching and Enrichment), a segment-level geometric matching algorithm that uniquely combines decomposition with quantitative shared length measurement, implemented in a high-performance, open-source Rust library with bindings to R and Python.
 ANIME quantifies the degree of correspondence between line geometries through shared length calculations, enabling robust handling of m:n relationships and complex topological dissimilarities.
 The algorithm leverages R*-tree spatial indexing with angle and distance-based matching criteria, combined with overlap computation methods that adapt to line segment orientation.
@@ -140,7 +140,7 @@ Network Conflation, Spatial Data Integration, Geometric Matching, Many-to-Many M
 
 - An open-source segment-level algorithm combining geometric decomposition with quantitative shared length measurement for matching topologically dissimilar linear network datasets.
 - High-performance implementation in Rust with comprehensive R and Python bindings for the geospatial research community.
-- Quantitative correspondence measurement using shared length calculations, supporting m:n relationships instead of 1:1 or 1:m relationships.
+- Quantitative correspondence measurement using shared length calculations, supporting m:n relationships rather than 1:1 or 1:m relationships.
 - Mathematically grounded extensive and intensive attribute interpolation methods rooted in areal interpolation theory for both numeric and categorical data.
 
 {{< pagebreak >}}
@@ -175,7 +175,7 @@ The literature predominantly frames network conflation as binary feature classif
 Early conflation methods established foundational approaches that remain influential today.
 One of the first practical implementations is documented in the Java Conflation Suite (JCS) technical report [@davis_java_2003].
 Buffer-based methods, exemplified by @goodchild_simple_1997, draw tolerance zones around features and measure overlap to calculate proportional coverage.
-While pioneering, these approaches yield binary matching decisions, inside buffer equals match, outside equals non-match, and struggle with complex topological relationships.
+While pioneering, these approaches yield binary matching decisions (where an intersection indicates a match and its absence indicates a non-match) and struggle with complex topological relationships.
 Feature-based approaches [@samal_feature_2004; @mustiere_matching_2008] advanced the field by incorporating both geometric and topological properties, introducing partial (1:m or m:n) matches through combined bottom-up (local geometric) and top-down (global topological) procedures.
 However, such methods often required manual intervention for complex split/merge scenarios, limiting their scalability.
 
@@ -364,7 +364,7 @@ Each line segment $A_{ik}$ is formally defined as the straight line connecting c
 - **Length**: $|A_{ik}| = \sqrt{(x_{k+1} - x_k)^2 + (y_{k+1} - y_k)^2}$
 - **Slope**: The slope is computed as:
   $$m_{A_{ik}} = \begin{cases} \frac{y_{k+1} - y_k}{x_{k+1} - x_k} & \text{if } x_{k+1} \neq x_k \\ \infty & \text{otherwise (vertical segment)} \end{cases}$$
-  For vertical segments, the algorithm projects onto the y-axis rather than the x-axis for overlap calculations. Specifically, when a segment is vertical ($x_{k+1} = x_k$), the slope is undefined; the algorithm switches the projection axis by computing y-range overlap and using the constant x-coordinate. The threshold for axis selection is 45°: segments with $|\theta| \leq 45°$ use x-projection, while steeper segments (including vertical) use y-projection, ensuring numerical stability for all orientations.
+  For vertical segments, the algorithm projects onto the y-axis rather than the x-axis for overlap calculations. Specifically, when a segment is vertical ($x_{k+1} = x_k$), the slope is undefined; the algorithm switches the projection axis by computing y-range overlap and using the constant x-coordinate. The threshold for axis selection is $45^\circ$: segments with $|\theta| \le 45^\circ$ use x-projection, while steeper segments (including vertical) use y-projection, ensuring numerical stability for all orientations.
 - **Angle**: $\theta_{A_{ik}} = \arctan(m_{A_{ik}})$
 - **Bounding Box**: $\text{AABB}_{A_{ik}} = [\min(x_k, x_{k+1}), \max(x_k, x_{k+1})] \times [\min(y_k, y_{k+1}), \max(y_k, y_{k+1})]$
 
@@ -468,7 +468,7 @@ p1_left + p1_right
 ```
 
 The spatial indexing construction is illustrated in @fig-aabb-construction.
-@fig-aabb-construction (left) shows how axis-aligned bounding boxes (AABBs) are created for the source network, while @fig-aabb-construction (right)  shows that the target network features distance-buffered envelopes.
+@fig-aabb-construction (left) shows how axis-aligned bounding boxes (AABBs) are created for the source network, while @fig-aabb-construction (right) shows that the target network features distance-buffered envelopes.
 If the AABBs of segments from $Tree_A$ and $Tree_B$ intersect, it indicates that the line segments $A_{ik}$ and $B_{jl}$ may be within the distance tolerance $DT$ of each other and are thus candidates for matching.
 
 The network overlay shown in @fig-network-overlay provides the spatial context for understanding potential match candidates, where intersecting bounding boxes indicate segment pairs that require geometric validation.
