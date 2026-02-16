@@ -14,6 +14,31 @@ Each case demonstrates different aggregation methods and weighting strategies, s
 ## Setup and Data Loading
 
 ```{r}
+#| label: download-data
+#| include: false
+# Ensure data directory exists and download datasets if missing
+data_dir <- "../data"
+if (!dir.exists(data_dir)) {
+  dir.create(data_dir)
+}
+
+datasets <- c(
+  "NPT.gpkg", "os_edinburgh.gpkg", "os_glasgow.gpkg",
+  "osm_bus_route.gpkg", "osm_edinburgh.gpkg", "osm_glasgow.gpkg"
+)
+
+base_url <- "https://github.com/wangzhao0217/anime/releases/download/sample_data"
+
+for (ds in datasets) {
+  dest_path <- file.path(data_dir, ds)
+  if (!file.exists(dest_path)) {
+    message(paste("Downloading", ds, "..."))
+    download.file(file.path(base_url, ds), dest_path, mode = "wb")
+  }
+}
+```
+
+```{r}
 #| label: setup-case-study
 #| include: false
 suppressMessages(library(sf))
