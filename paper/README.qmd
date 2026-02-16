@@ -123,10 +123,10 @@ abstract_f1 <- 2 * prec * rec / (prec + rec)
 
 Spatial joins are a fundamental technique in spatial data science, but established techniques struggle when both source and target geometries are linestrings.
 Existing methods are limited by the use of buffers or distance rules resulting in binary joins, whereas in fact the extent to which two linestrings overlap can usefully be seen as a continuous variable.
-This paper presents ANIME (Approximate Network Integration, Matching and Enrichment), a segment-level geometric matching algorithm that uniquely combines decomposition with quantitative shared length measurement, implemented in a high-performance, open-source Rust library with bindings to R and Python.
-ANIME quantifies the degree of correspondence between line geometries through shared length calculations, enabling robust handling of m:n relationships and complex topological dissimilarities.
-The algorithm leverages R*-tree spatial indexing with angle and distance-based matching criteria, combined with overlap computation methods that adapt to line segment orientation.
-The algorithm computes shared length ($SL_{ij}$) between corresponding features, providing the foundation for extensive and intensive attribute interpolation methods that enable statistically sound attribute transfer.
+This paper presents ANIME (Approximate Network Integration, Matching and Enrichment), a linestring matching algorithm that calculates shared lengths between linestring sets with many-to-many relationships.
+The algorithm uses R*-tree spatial indexing with angle and distance-based matching thresholds, combined with overlap computation methods that adapt to line segment orientation.
+The shared lengths ($SL_{ij}$) between features enable extensive and intensive attribute interpolation methods for accurate attribute transfer.
+ANIME is implemented in `anime`, a Rust crate with bindings to R and Python packages.
 A case study on Scottish transport networks demonstrates effective handling of generalized-to-detailed geometry matching and multi-source attribute integration, achieving `r sprintf("%.1f%%", abstract_f1 * 100)` F1-score accuracy in validation experiments.
 The implementation processes networks of 15,000+ features in sub-second time, with applications demonstrated in transport planning and potential extensions to hydrographic conflation, ecological modeling, and infrastructure management.
 
