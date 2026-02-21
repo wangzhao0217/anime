@@ -127,4 +127,104 @@ mod tests {
         assert_eq!(overlap.start, 5.0);
         assert_eq!(overlap.end, 10.0);
     }
+
+    // https://github.com/JosiahParry/anime/issues/59
+    // This reproduces the issue where two parallel near-vertical lines
+    // can have opposite slope signs (one +89°, one -89°) depending on
+    // whether dx is positive or negative, causing them to appear ~178° apart
+    // and fail angle tolerance checks even though they are genuinely parallel.
+    #[test]
+    fn test_near_vertical_parallel_lines() {
+        use crate::Anime;
+        use geo_types::{coord, LineString};
+
+        // Target line: going north, leaning very slightly left
+        // dx = -0.5, dy = 50 -> slope ≈ -100
+        let target = vec![LineString::new(vec![
+            coord! {x: 100.0, y: 0.0},
+            coord! {x: 99.5, y: 50.0},
+        ])];
+
+        // Source A (CLOSE, ~2m away): leaning slightly RIGHT (opposite slope sign)
+        // dx = +0.5 -> slope ≈ +100
+        // This should MATCH but was being rejected before the fix
+        let source_close =
+            LineString::new(vec![coord! {x: 102.0, y: 0.0}, coord! {x: 102.5, y: 50.0}]);
+
+        // Source B (FAR, ~10m away): leaning slightly left (same slope sign as target)
+        // dx = -0.5 -> slope ≈ -100
+        let source_far =
+            LineString::new(vec![coord! {x: 110.0, y: 0.0}, coord! {x: 109.5, y: 50.0}]);
+
+        let sources = vec![source_close, source_far];
+
+        let anime = Anime::new(sources.into_iter(), target.into_iter(), 15.0, 20.0);
+
+        let matches = anime.matches.get().unwrap();
+
+        // Both sources should match the target since they are both parallel
+        // and within distance tolerance
+        if let Some(target_matches) = matches.get(&0) {
+            // We expect BOTH source lines to match (source_id 0 and 1)
+            assert_eq!(
+                target_matches.len(),
+                2,
+                "Both near-vertical parallel lines should match regardless of slope sign"
+            );
+
+            // Verify both source indices are present
+            let source_indices: Vec<usize> =
+                target_matches.iter().map(|m| m.source_index).collect();
+            assert!(
+                source_indices.contains(&0),
+                "Close source (opposite slope sign) should match"
+            );
+            assert!(
+                source_indices.contains(&1),
+                "Far source (same slope sign) should match"
+            );
+        } else {
+            panic!("Target should have matches");
+        }
+    }
+
+    // https://github.com/JosiahParry/anime/issues/59
+    #[test]
+    fn test_diagonal_parallel_lines() {
+        use crate::Anime;
+        use geo_types::{coord, LineString};
+
+        // Target line at ~45° angle
+        let target = vec![LineString::new(vec![
+            coord! {x: 0.0, y: 0.0},
+            coord! {x: 40.0, y: 50.0},
+        ])];
+
+        // Two parallel sources, shifted left and right
+        let source_a = LineString::new(vec![coord! {x: 2.0, y: 0.0}, coord! {x: 42.0, y: 50.0}]);
+
+        let source_b = LineString::new(vec![coord! {x: -2.0, y: 0.0}, coord! {x: 38.0, y: 50.0}]);
+
+        let sources = vec![source_a, source_b];
+
+        let anime = Anime::new(
+            sources.into_iter(),
+            target.into_iter(),
+            5.0,  // distance_tolerance
+            20.0, // angle_tolerance
+        );
+
+        let matches = anime.matches.get().unwrap();
+
+        // Both diagonal parallels should match correctly
+        if let Some(target_matches) = matches.get(&0) {
+            assert_eq!(
+                target_matches.len(),
+                2,
+                "Both diagonal parallel lines should match"
+            );
+        } else {
+            panic!("Target should have matches");
+        }
+    }
 }
