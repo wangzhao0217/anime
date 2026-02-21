@@ -19,14 +19,3 @@ geo-traits = { workspace = true }
 geoarrow = { workspace = true }
 geoarrow-array = { workspace = true }
 itertools = "0.12.0"
-
-[workspace]
-resolver = "2"
-members = [".", "rust"]
-package = { version = "0.2.0", edition = "2021", rust-version = "1.90" }
-dependencies = { anime = { path = "rust", features = [
-] }, arrow = { version = "55", default-features = false, features = [
-] }, geo = "0.29.3", geo-traits = "0.3.0", geo-types = { version = "0.7.12", features = [
-  "use-rstar_0_11",
-] }, geoarrow = "0.4.0", geoarrow-array = "0.4.0", rstar = "0.11.0" }
-lints = { rust = { unsafe_code = "forbid" } }
