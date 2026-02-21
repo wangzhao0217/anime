@@ -167,9 +167,9 @@ fn find_candidate_matches(
         let (i, x_slope) = cx.data;
         let (j, y_slope) = cy.data;
 
-        // convert calculated slopes to degrees
-        let x_deg = x_slope.abs().atan().to_degrees();
-        let y_deg = y_slope.abs().atan().to_degrees();
+        // convert calculated slopes to degrees normalize to 180
+        let x_deg = (x_slope.atan().to_degrees() + 180.0) % 180.0;
+        let y_deg = (y_slope.atan().to_degrees() + 180.0) % 180.0;
 
         // compare slopes:
         let is_tolerant = (x_deg - y_deg).abs() < angle_tolerance;

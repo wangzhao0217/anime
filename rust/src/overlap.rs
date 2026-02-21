@@ -147,7 +147,6 @@ mod tests {
 
         // Source A (CLOSE, ~2m away): leaning slightly RIGHT (opposite slope sign)
         // dx = +0.5 -> slope ≈ +100
-        // This should MATCH but was being rejected before the fix
         let source_close =
             LineString::new(vec![coord! {x: 102.0, y: 0.0}, coord! {x: 102.5, y: 50.0}]);
 
