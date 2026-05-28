@@ -24,14 +24,14 @@ library(sf)
 # -----------------------------
 # Load pre-prepared datasets
 # -----------------------------
-os_edinburgh <- sf::st_read("../data/os_edinburgh.gpkg", quiet = TRUE)
-os_glasgow <- sf::st_read("../data/os_glasgow.gpkg", quiet = TRUE)
-osm_edinburgh <- sf::st_read("../data/osm_edinburgh.gpkg", quiet = TRUE)
-osm_glasgow <- sf::st_read("../data/osm_glasgow.gpkg", quiet = TRUE)
+os_edinburgh <- sf::st_read("./data/os_edinburgh.gpkg", quiet = TRUE)
+os_glasgow <- sf::st_read("./data/os_glasgow.gpkg", quiet = TRUE)
+osm_edinburgh <- sf::st_read("./data/osm_edinburgh.gpkg", quiet = TRUE)
+osm_glasgow <- sf::st_read("./data/osm_glasgow.gpkg", quiet = TRUE)
 
 # Load NPT and bus route data for Cases 1-2
-npt_sf <- sf::st_read("../data/NPT.gpkg", quiet = TRUE)
-osm_bus_route_sf <- sf::st_read("../data/osm_bus_route.gpkg", quiet = TRUE)
+npt_sf <- sf::st_read("./data/NPT.gpkg", quiet = TRUE)
+osm_bus_route_sf <- sf::st_read("./data/osm_bus_route.gpkg", quiet = TRUE)
 
 # Convert multilinestrings to linestrings for ANIME compatibility
 osm_edinburgh <- sf::st_cast(osm_edinburgh, "LINESTRING")
@@ -189,6 +189,99 @@ if(nrow(match_df_1) > 0 && nrow(match_df_1_attr) > 0) {
   )
 } else {
   cat("No matches found for Case 1. Try adjusting distance_tolerance or angle_tolerance parameters.")
+}
+```
+
+The user-facing `anime_join()` interface can express the same Case 1 transfer directly, returning the enriched target network as an `sf` object. In a full render, this chunk uses the objects prepared above; if it is run interactively on its own, it loads the same paper data first.
+
+```{r}
+#| label: case1-anime-join
+#| echo: true
+
+if (!exists("npt_sf") || !exists("target_sample_1")) {
+  data_dir <- if (dir.exists("./data")) "./data" else "data"
+
+  npt_sf <- sf::st_read(file.path(data_dir, "NPT.gpkg"), quiet = TRUE)
+  os_edinburgh_join <- sf::st_read(
+    file.path(data_dir, "os_edinburgh.gpkg"),
+    quiet = TRUE
+  )
+
+  npt_sf <- sf::st_cast(npt_sf, "LINESTRING")
+  os_edinburgh_join <- sf::st_cast(os_edinburgh_join, "LINESTRING")
+  os_edinburgh_join$target_id <- seq_len(nrow(os_edinburgh_join))
+
+  if (sf::st_crs(npt_sf)$input != "EPSG:27700") {
+    npt_sf <- sf::st_transform(npt_sf, 27700)
+  }
+
+  npt_bbox <- sf::st_bbox(npt_sf)
+  os_in_npt_area_join <- os_edinburgh_join[
+    sf::st_intersects(
+      os_edinburgh_join,
+      sf::st_as_sfc(npt_bbox),
+      sparse = FALSE
+    ),
+  ]
+
+  if (nrow(os_in_npt_area_join) >= 5) {
+    set.seed(42)
+    sample_target_ids <- sample(os_in_npt_area_join$target_id, 5)
+  } else if (nrow(os_in_npt_area_join) > 0) {
+    sample_target_ids <- os_in_npt_area_join$target_id[
+      seq_len(min(5, nrow(os_in_npt_area_join)))
+    ]
+  } else {
+    sample_target_ids <- os_edinburgh_join$target_id[
+      seq_len(min(5, nrow(os_edinburgh_join)))
+    ]
+  }
+
+  target_sample_1 <- os_edinburgh_join[
+    os_edinburgh_join$target_id %in% sample_target_ids,
+  ]
+}
+
+target_joined_1 <- anime::anime_join(
+  source = npt_sf,
+  target = target_sample_1,
+  distance_tolerance = 15,
+  angle_tolerance = 35,
+  prefix = "anime_",
+  columns = "all_fastest_bicycle_go_dutch",
+  flow = "all_fastest_bicycle_go_dutch"
+)
+
+if (exists("target_integrated_1")) {
+  anime_join_check_1 <- merge(
+    sf::st_drop_geometry(target_joined_1)[
+      c("target_id", "anime_all_fastest_bicycle_go_dutch_wt")
+    ],
+    sf::st_drop_geometry(target_integrated_1)[c("target_id", "go_dutch")],
+    by = "target_id",
+    all.x = TRUE
+  )
+  anime_join_check_1$go_dutch[is.na(anime_join_check_1$go_dutch)] <- 0
+  anime_join_check_1$difference <- (
+    anime_join_check_1$anime_all_fastest_bicycle_go_dutch_wt -
+      anime_join_check_1$go_dutch
+  )
+
+  knitr::kable(
+    anime_join_check_1,
+    caption = "Case 1: anime_join() output compared with the low-level ANIME aggregation",
+    digits = 2,
+    col.names = c("Target ID", "anime_join Go Dutch", "Low-level Go Dutch", "Difference")
+  )
+} else {
+  knitr::kable(
+    sf::st_drop_geometry(target_joined_1)[
+      c("target_id", "anime_all_fastest_bicycle_go_dutch_wt")
+    ],
+    caption = "Case 1: anime_join() Go Dutch transfer",
+    digits = 2,
+    col.names = c("Target ID", "anime_join Go Dutch")
+  )
 }
 ```
 
